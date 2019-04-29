@@ -1,0 +1,18 @@
+version: '3'
+services:
+  db:
+    image: "postgres:10"
+    container_name: db
+    ports:
+      - "5432:5432"
+    volumes:
+       - "./resources/sql/schema.sql:/docker-entrypoint-initdb.d/00-schema.sql"
+    environment:
+      - POSTGRES_USER=icculus
+      - POSTGRES_PASSWORD=icculus
+      - POSTGRES_DB=icculus
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"

@@ -1,0 +1,10 @@
+{:prod    false
+ :nrepl   {:port 4900 :bind "localhost"}
+ :discord {:key "override via env or elsewhere"}
+ :db      {:subprotocol   "postgresql"
+           :classname     "org.postgresql.Driver"
+           :subname       "//127.0.0.1:5432/icculus"
+           :user          "icculus"
+           :password      "icculus"
+           }
+ }
