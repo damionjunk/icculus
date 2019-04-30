@@ -48,6 +48,13 @@
     (catch Exception e
       (prn e))))
 
+(defn round-double
+  "Round a double to the given precision (number of significant digits)"
+  [precision d]
+  (when (= (type d) Double)
+    (let [factor (Math/pow 10 precision)]
+      (/ (Math/round (* d factor)) factor))))
+
 (comment
 
   (duration->human 10000000000)
@@ -55,5 +62,5 @@
   (duration->human (Period. 0 0 3 500 0 0 0 0))
 
   (.normalizedStandard (Period. 0 0 3 500 0 0 0 0) (org.joda.time.PeriodType/standard))
-  
+
   )

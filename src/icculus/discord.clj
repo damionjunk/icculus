@@ -86,6 +86,13 @@
      :footer      {:text (gap-message-days gap)}
      }))
 
+(defmethod build-embed :timesplayed [{tp :type era :era start :start end :end title :title}]
+  (if-let [tpdata (stats/times-played title (if era :era :range) (if era era start) end)]
+    {:color       (rand-nth colors)
+     :title       (if era (str "During the " era " era, " title " was played " (:plays tpdata) " times.")
+                          (str "Between " (timef/unparse (:year-month-day timef/formatters) start) " and " (timef/unparse (:year-month-day timef/formatters) (or end (time/now))) ", " title " was played " (:plays tpdata) " times."))
+     :description (str "There were a total of " (:period-total tpdata) " songs played during this period.")
+     :footer      {:text (str "This represents " title " being played " (util/round-double 2 (* 100 (double (/ (:plays tpdata) (:period-total tpdata))))) "% of the time.")}}))
 
 (def handler nil)
 (defmulti handler (fn [event-type event-data] event-type))
@@ -97,7 +104,7 @@
   (when-not bot
     (when-let [cmd (i/icculizer content)]
       (when-let [embed (build-embed cmd)]
-        (prn "Embed:" embed)
+        (log/info "Responding to valid command:" content)
         (m/create-message! (:messaging @state) channel-id :embed embed)))))
 
 
@@ -126,17 +133,5 @@
 
   (future (connect))
   (disconnect)
-
-  (a/put! (:connection @state) [:disconnect])
-
-  (def colors [0x375E97 0xFB6542 0xFFBB00 0x3F681C])
-
-  (build-embed (i/icculizer "?firstplayed yem"))
-
-
-
-  (.toStandardHours (org.joda.time.Duration. 609254))
-  (.toStandardMinutes (org.joda.time.Duration. 609254))
-  (.toStandardSeconds (org.joda.time.Duration. 609254))
 
   )
