@@ -16,7 +16,7 @@
 
 (defmethod get-song :number [id]
   (let [song (first (find-song-by-id (:db env) {:id id}))]
-    (if (:alias_for song) (get-song-by-id (:alias_for song)) song)))
+    (if (:alias_for song) (get-song (:alias_for song)) song)))
 
 (defmethod get-song :string [title]
   (let [song (first (find-song-by-slug (:db env) {:slug (->slug title)}))]

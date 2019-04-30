@@ -2,16 +2,21 @@
   (:require [discljord.connections :as c]
             [discljord.messaging :as m]
             [discljord.events :as e]
+            [clj-time.format :as timef]
+            [clj-time.core :as time]
             [clojure.core.async :as a]
             [clojure.tools.logging :as log]
             [icculus.commands :as i]
             [icculus.config :refer [env]]
-            [clojure.string :as s]))
+            [icculus.db.stats :as stats]
+            [clojure.string :as s]
+            [icculus.util :as util]))
 
 ;; Keeps connection information for discljord.
 (def state (atom nil))
 
 (def colors [0x375E97 0xFB6542 0xFFBB00 0x3F681C])
+(def readable-date (timef/formatter "EEEE, MMMM dd, yyyy"))
 
 (def build-embed nil)
 (defmulti build-embed (fn [{cmd :cmd}] cmd))
@@ -19,7 +24,6 @@
 
 (defmethod build-embed :icculus [_]
   {:color  (rand-nth colors)
-   :author {:name "Icculus"}
    :title  "Icculus bot commands"
    :fields (map (fn [[cmd {help :help ex :examples}]]
                   {:name  (str cmd " " help)
@@ -28,7 +32,6 @@
 
 (defmethod build-embed :fam [_]
   {:color       (rand-nth colors)
-   :author      {:name "Icculus"}
    :title       "Those listed here have received blessings from Icculus:"
    :description (s/join
                   "\n"
@@ -40,7 +43,49 @@
                    "@mocacola15, @inf4m0us - Early vessels of the knowledge of Icculus."
                    "@Dirty Harry Hood, @alflup - Prayers to Icculus were heard."
                    "```"])
-   :footer      "Your name too can be written in the Helping Friendly Book."})
+   :footer      {:text "Your name too can be written in the Helping Friendly Book."}})
+
+(defmethod build-embed :firstplayed [{title :title}]
+  (if-let [song (stats/first-played title)]
+    {:color       (rand-nth colors)
+     :title       (str (:title song) " was first played on " (timef/unparse readable-date (:show_date song)))
+     :description (str "It was played at " (:name song) " in " (:location song))
+     :footer      {:text (str (:title song) " was song " (:position song) " in set " (:set song) " and had a duration of " (util/duration->human (long (:duration song))))}
+     }))
+
+(defmethod build-embed :lastplayed [{title :title}]
+  (if-let [song (stats/last-played title)]
+    {:color       (rand-nth colors)
+     :title       (str (:title song) " was last played on " (timef/unparse readable-date (:show_date song)))
+     :description (str "It was played at " (:name song) " in " (:location song))
+     :footer      {:text (str (:title song) " was song " (:position song) " in set " (:set song) " and had a duration of " (util/duration->human (long (:duration song))))}
+     }))
+
+(defn gap-message [[l h] gap]
+  (cond
+    (<= gap l) "That seems about right."
+    (<= gap h) "I'm not sure I'm okay with this..."
+    :default "This is too damn long!"))
+
+(defn gap-message-shows [gap] (gap-message [5 15] gap))
+(defn gap-message-days  [gap] (gap-message [45 100] gap))
+
+(defmethod build-embed :showgap [{title :title}]
+  (if-let [gap (stats/show-gap title)]
+    {:color       (rand-nth colors)
+     :title       (str "The number of shows since " title " has been played ...")
+     :description (str "... is " gap "!")
+     :footer      {:text (gap-message-shows gap)}
+     }))
+
+(defmethod build-embed :daygap [{title :title}]
+  (if-let [gap (stats/day-gap title)]
+    {:color       (rand-nth colors)
+     :title       (str "The number of days since " title " has been played ...")
+     :description (str "... is " gap " days!")
+     :footer      {:text (gap-message-days gap)}
+     }))
+
 
 (def handler nil)
 (defmulti handler (fn [event-type event-data] event-type))
@@ -52,6 +97,7 @@
   (when-not bot
     (when-let [cmd (i/icculizer content)]
       (when-let [embed (build-embed cmd)]
+        (prn "Embed:" embed)
         (m/create-message! (:messaging @state) channel-id :embed embed)))))
 
 
@@ -76,6 +122,8 @@
 
 (comment
 
+  (util/duration->human (long (:duration (stats/first-played "yem"))))
+
   (future (connect))
   (disconnect)
 
@@ -83,6 +131,12 @@
 
   (def colors [0x375E97 0xFB6542 0xFFBB00 0x3F681C])
 
-  (build-embed (i/icculizer "?icculus"))
+  (build-embed (i/icculizer "?firstplayed yem"))
+
+
+
+  (.toStandardHours (org.joda.time.Duration. 609254))
+  (.toStandardMinutes (org.joda.time.Duration. 609254))
+  (.toStandardSeconds (org.joda.time.Duration. 609254))
 
   )
