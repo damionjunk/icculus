@@ -1,14 +1,34 @@
 (ns icculus.db.stats
   (:require [clj-time.core :as time :refer [now days seconds minutes hours years from-now]]
+            [clj-time.format :as timef]
             [clojure.tools.logging :as log]
             [hugsql.core :as hugsql]
             [clojure.string :as s]
             [clojure.java.io :as io]
+            [icculus.util :as util]
             [icculus.config :refer [env]]
             [icculus.util :refer [->slug]]
             [clj-time.jdbc]))
 
 (hugsql/def-db-fns (io/resource "sql/phishstats.sql"))
+
+;; Adding this due to issues with `date` in PGsql, and the driver doing some bad timezone stuff.
+(def simple-date (timef/formatter "yyyy-MM-dd"))
+
+; (defn log-sqlvec [sqlvec]
+;   (log/info (->> sqlvec
+;                  (map #(clojure.string/replace (or % "") #"\n" ""))
+;                  (clojure.string/join " ; "))))
+
+; (defn log-command-fn [this db sqlvec options]
+;   (log-sqlvec sqlvec)
+;   (condp contains? (:command options)
+;     #{:!} (hugsql.adapter/execute this db sqlvec options)
+;     #{:? :<!} (hugsql.adapter/query this db sqlvec options)))
+
+; (defmethod hugsql.core/hugsql-command-fn :! [sym] `log-command-fn)
+; (defmethod hugsql.core/hugsql-command-fn :<! [sym] `log-command-fn)
+; (defmethod hugsql.core/hugsql-command-fn :? [sym] `log-command-fn)
 
 (def get-song nil)
 ;; PG returns Integers, Clojure uses Longs, we'll just use number!
@@ -37,9 +57,11 @@
     (last-n-played-by-id (:db env) {:song_id (:id song) :limit n})))
 
 (defn get-set-data [date]
-  (let [show (first (show-by-date (:db env) {:show_date date}))
+  (let [dstr (timef/unparse simple-date date)
+        show (first (show-by-date (:db env) {:show_date dstr}))
         tracks (and show (tracks-by-show-id (:db env) {:show_id (:id show)}))]
-    (assoc show :tracks tracks)))
+    (when show 
+      (assoc show :tracks tracks))))
 
 (defn show-gap [title]
   (if-let [lp (last-played title)]
@@ -125,8 +147,11 @@
   (last-played "YeM   ")
   (last-n-played 3 "yem")
 
-  (get-set-data (time/date-time 2019 02 22))
-
+  (clojure.pprint/pprint  (get-set-data (util/->date "12/31/2018")))
+  (clojure.pprint/pprint  (get-set-data "12/31/2018"))
+  (show-by-date (:db env) {:show_date "2019-06-21"})
+  (tracks-by-show-id (:db env) {:show_id 999007})
+  
   (show-gap "strawberry fields forever")
   (day-gap "strawberry fields forever")
   (day-gap "yem")

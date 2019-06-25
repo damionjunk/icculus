@@ -17,6 +17,7 @@
 
 (def colors [0x375E97 0xFB6542 0xFFBB00 0x3F681C])
 (def readable-date (timef/formatter "EEEE, MMMM dd, yyyy"))
+(def setlist-date (timef/formatter "MM/dd/yyyy"))
 
 (def build-embed nil)
 (defmulti build-embed (fn [{cmd :cmd}] cmd))
@@ -142,6 +143,28 @@
        :footer {:text "Phish can do no wrong!"}
        :description (str (apply str (map-indexed duration-message l))
                          (agg-stats-message st))})))
+
+(defn setlist [tracks]
+  (->> (group-by :set tracks)
+       (sort-by first)
+       (map (fn [[s trks]]
+              (str "🔥 __Set " s "__ `(" (util/duration->hh-mm-ss (apply + (map :duration trks))) ")`\n"
+                   (apply str (map-indexed (fn [i t]
+                                             (str "**" (inc i) ".** " (:title t) " ")
+                                             ) (sort-by :position trks)))
+                   "\n\n")
+              ))))
+
+(defmethod build-embed :setlist [{setdate :start :as c}]
+  (when setdate
+    (when-let [sd (stats/get-set-data setdate)]
+      (log/info "SD:" sd)
+      {:color (rand-nth colors)
+       :title (str "Setlist for " (timef/unparse setlist-date setdate) " @ "
+                   (:name sd) " in " (:location sd))
+       :description (apply str (setlist (:tracks sd)))
+       :footer {:text (str "Total set duration: " (util/duration->hh-mm-ss (:duration sd)))}}
+      )))
 
 (def handler nil)
 (defmulti handler (fn [event-type event-data] event-type))

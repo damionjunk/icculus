@@ -18,7 +18,7 @@ select t.id, t.show_date, t.era, t.title, t.position, t.duration, t.mp3, t.jamch
 select t.id, t.show_date, t.era, t.title, t.position, t.duration, t.mp3, t.jamcharts, t.set, v.name, v.location, v.city, v.state, v.country from tracks t, venues v where v.id = t.venue_id AND :song_id = ANY (t.song_ids) order by t.show_date DESC limit :limit
 
 -- :name show-by-date :?
-select s.id, s.venue_id, s.duration, v.name, v.location, v.city, v.state, v.country from shows s, venues v where v.id = s.venue_id AND s.show_date = :show_date
+select s.id, s.show_date, s.venue_id, s.duration, v.name, v.location, v.city, v.state, v.country from shows s, venues v where v.id = s.venue_id AND s.show_date = date(:show_date)
 
 -- :name tracks-by-show-id :?
 select * from tracks where show_id = :show_id order by position;

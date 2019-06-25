@@ -81,7 +81,7 @@
 
   (icculizer "?timesplayed 2017 2018 46 days")
   (icculizer "?timesplayed")
-  (icculizer "?setlist 2018")
+  (icculizer "?setlist 6/21/2019")
   (icculizer "?setlist")
   (icculizer "?shortest yem")
   
