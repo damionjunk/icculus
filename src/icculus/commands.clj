@@ -30,9 +30,9 @@
    "?shortest"    {:cmd  :shortest :title true :sort 1
                    :help "[title]"
                    :examples ["?shortest runaway jim"]}
-   "?longeset"    {:cmd  :longest :title true :sort 1
-                   :help "[title]"
-                   :examples ["?longest bbfcfm"]}}
+   "?longest"    {:cmd  :longest :title true :sort 1
+                  :help "[title]"
+                  :examples ["?longest bbfcfm"]}}
   )
 
 (defn tp-parser [rst]
@@ -83,7 +83,9 @@
   (icculizer "?timesplayed")
   (icculizer "?setlist 2018")
   (icculizer "?setlist")
-  (icculizer "?shortestz yem")
+  (icculizer "?shortest yem")
+  
+  (icculizer "?longest yem")
 
 
   (icculizer "?fam")

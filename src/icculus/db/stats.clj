@@ -32,6 +32,10 @@
   (if-let [song (get-song title)]
     (first (last-played-by-id (:db env) {:song_id (:id song)}))))
 
+(defn last-n-played [n title]
+  (if-let [song (get-song title)]
+    (last-n-played-by-id (:db env) {:song_id (:id song) :limit n})))
+
 (defn get-set-data [date]
   (let [show (first (show-by-date (:db env) {:show_date date}))
         tracks (and show (tracks-by-show-id (:db env) {:show_id (:id show)}))]
@@ -62,6 +66,7 @@
     (first (all-tracks-stats (:db env) {:song_id (:id song)}))))
 
 (defn longest [title & [limit]]
+  (println "longest")
   (if-let [song (get-song title)]
     (let [longest-tracks (longest-by-song-id (:db env) {:song_id (:id song) :limit (or limit 3)})]
       (map (fn [lt]
@@ -70,7 +75,7 @@
                       (select-keys show [:name :location])
                       {:date (-> show :tracks first :show_date)
                        :dow  (-> show :tracks first :dow)})))
-           (sort-by :duration longest-tracks)))))
+           longest-tracks))))
 
 (defn shortest [title & [limit]]
   (if-let [song (get-song title)]
@@ -81,7 +86,7 @@
                       (select-keys show [:name :location])
                       {:date (-> show :tracks first :show_date)
                        :dow  (-> show :tracks first :dow)})))
-           (sort-by :duration shortest-tracks)))))
+           shortest-tracks))))
 
 (comment
 
@@ -90,7 +95,10 @@
 
   (longest-by-song-id (:db env) {:song_id 879 :limit 3})
 
-  (duration-agg-stats "yem")
+  (-> (duration-agg-stats "yem") :avg (.longValue))
+  
+  
+  
 
   (def xf (map :plays))
   (transduce (map :plays) + (track-total-by-era (:db env) {:era "3.0" :song_id 879}))
@@ -115,6 +123,7 @@
   (get-song "YEM")
   (first-played "YeM   ")
   (last-played "YeM   ")
+  (last-n-played 3 "yem")
 
   (get-set-data (time/date-time 2019 02 22))
 

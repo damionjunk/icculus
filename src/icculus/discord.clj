@@ -13,7 +13,7 @@
             [icculus.util :as util]))
 
 ;; Keeps connection information for discljord.
-(def state (atom nil))
+(defonce state (atom nil))
 
 (def colors [0x375E97 0xFB6542 0xFFBB00 0x3F681C])
 (def readable-date (timef/formatter "EEEE, MMMM dd, yyyy"))
@@ -54,11 +54,18 @@
      }))
 
 (defmethod build-embed :lastplayed [{title :title}]
-  (if-let [song (stats/last-played title)]
+  (if-let [songs (stats/last-n-played 3 title)]
     {:color       (rand-nth colors)
-     :title       (str (:title song) " was last played on " (timef/unparse readable-date (:show_date song)))
-     :description (str "It was played at " (:name song) " in " (:location song))
-     :footer      {:text (str (:title song) " was song " (:position song) " in set " (:set song) " and had a duration of " (util/duration->human (long (:duration song))))}
+     :title       (str (:title (first songs)) " was last played on " (timef/unparse readable-date (:show_date (first songs))))
+     :description 
+     (apply str
+            (str "It was played at " (:name (first songs)) " in " (:location (first songs)) "\n\n")
+            "Next most recent plays 🌸:\n"
+            (map (fn [song]
+                   (str " 🌵 "
+                        (timef/unparse readable-date (:show_date song)) 
+                        " at " (:name song) " in " (:location song) "\n")) 
+                 (rest songs)))
      }))
 
 (defn gap-message [[l h] gap]
@@ -66,6 +73,11 @@
     (<= gap l) "That seems about right."
     (<= gap h) "I'm not sure I'm okay with this..."
     :default "This is too damn long!"))
+
+(defn jam-message [{avg :avg sd :sd mmin :min mmax :max}]
+  (if (>= (- mmax mmin) 300000) ; 5 minutes
+    "Those were some tasty jams!"
+    "Great songs, but not much jam length variation."))
 
 (defn gap-message-shows [gap] (gap-message [5 15] gap))
 (defn gap-message-days  [gap] (gap-message [45 100] gap))
@@ -94,6 +106,43 @@
      :description (str "There were a total of " (:period-total tpdata) " songs played during this period.")
      :footer      {:text (str "This represents " title " being played " (util/round-double 2 (* 100 (double (/ (:plays tpdata) (:period-total tpdata))))) "% of the time.")}}))
 
+(defn duration-message [i {dur :duration title :title loc :name city :location d :date}]
+  (str "[" (inc i) "]: " (util/duration->human (long dur))
+       " on " (timef/unparse readable-date d)
+       " 🐟🐟🐟 @ "
+       loc " in " city
+       "\n\n"))
+
+(defn agg-stats-message [{avg :avg sd :sd mmin :min mmax :max}]
+  (str "🌸 Summary stats:\navg: "
+       (util/duration->hh-mm-ss (.longValue avg))
+       " sd: "
+       (util/duration->hh-mm-ss (.longValue sd))
+       " min: "
+       (util/duration->hh-mm-ss mmin)
+       " max: "
+       (util/duration->hh-mm-ss mmax)
+       " 🌵🌵🌵"))
+
+(defmethod build-embed :longest [{title :title}]
+  (if-let [l (stats/longest title)]
+    (if-let [st (stats/duration-agg-stats title)]
+      {:color (rand-nth colors)
+       :title (str "The top " (count l) " longest played versions of " title " 🚀")
+       :footer {:text (jam-message st)}
+       :description (str (apply str (map-indexed duration-message l))
+                         (agg-stats-message st))
+       })))
+
+(defmethod build-embed :shortest [{title :title}]
+  (if-let [l (stats/shortest title)]
+    (if-let [st (stats/duration-agg-stats title)]
+      {:color (rand-nth colors)
+       :title (str "The " (count l) " shortest played versions of " title " 🚀")
+       :footer {:text "Phish can do no wrong!"}
+       :description (str (apply str (map-indexed duration-message l))
+                         (agg-stats-message st))})))
+
 (def handler nil)
 (defmulti handler (fn [event-type event-data] event-type))
 (defmethod handler :default [_ _])
@@ -105,6 +154,7 @@
     (when-let [cmd (i/icculizer content)]
       (when-let [embed (build-embed cmd)]
         (log/info "Responding to valid command:" content)
+        ;(log/info embed)
         (m/create-message! (:messaging @state) channel-id :embed embed)))))
 
 
@@ -128,10 +178,6 @@
 
 
 (comment
-
-  (util/duration->human (long (:duration (stats/first-played "yem"))))
-
   (future (connect))
   (disconnect)
-
   )

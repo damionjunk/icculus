@@ -4,6 +4,7 @@
             [clojure.tools.cli :refer [parse-opts]]
             [mount.core :as mount]
             [icculus.repl :as repl]
+            [icculus.discord :as discord]
             [icculus.config :refer [env]]
             ))
 
@@ -20,6 +21,9 @@
           (when repl-server
             (repl/stop repl-server)))
 
+(defstate ^{:on-reload :noop} discord-connection
+  :start (future (discord/connect))
+  :stop  (discord/disconnect))
 
 (defn stop-app []
   (doseq [component (:stopped (mount/stop))]
@@ -33,7 +37,6 @@
                         :started)]
     (log/info component "started"))
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
-
 
 (defn -main [& args]
   (start-app args))

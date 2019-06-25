@@ -13,6 +13,10 @@ select t.id, t.show_date, t.era, t.title, t.position, t.duration, t.mp3, t.jamch
 -- :doc Finds the last time a song was played.
 select t.id, t.show_date, t.era, t.title, t.position, t.duration, t.mp3, t.jamcharts, t.set, v.name, v.location, v.city, v.state, v.country from tracks t, venues v where v.id = t.venue_id AND :song_id = ANY (t.song_ids) order by t.show_date DESC limit 1
 
+-- :name last-n-played-by-id :?
+-- :doc Finds the last time a song was played, with a :limit for last N.
+select t.id, t.show_date, t.era, t.title, t.position, t.duration, t.mp3, t.jamcharts, t.set, v.name, v.location, v.city, v.state, v.country from tracks t, venues v where v.id = t.venue_id AND :song_id = ANY (t.song_ids) order by t.show_date DESC limit :limit
+
 -- :name show-by-date :?
 select s.id, s.venue_id, s.duration, v.name, v.location, v.city, v.state, v.country from shows s, venues v where v.id = s.venue_id AND s.show_date = :show_date
 

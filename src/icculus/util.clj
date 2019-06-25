@@ -48,6 +48,18 @@
     (catch Exception e
       (prn e))))
 
+(defn duration->hh-mm-ss [dur]
+  (try
+    (let [p (.normalizedStandard (Period. (time-handle dur)))
+          h (when (pos? (.getHours p)) (.getHours p))
+          m (if (pos? (.getMinutes p)) (.getMinutes p) 0)
+          s (if (pos? (.getSeconds p)) (.getSeconds p) 0)
+          ms (format "%02d:%02d" m s)]
+      (if h (str (format "%02d:" h) ms) ms))
+    (catch Exception e
+      (prn e)))
+  )
+
 (defn round-double
   "Round a double to the given precision (number of significant digits)"
   [precision d]
@@ -57,10 +69,10 @@
 
 (comment
 
+  (duration->hh-mm-ss 1000)
+  (duration->human 300000)
   (duration->human 10000000000)
-
   (duration->human (Period. 0 0 3 500 0 0 0 0))
-
   (.normalizedStandard (Period. 0 0 3 500 0 0 0 0) (org.joda.time.PeriodType/standard))
 
   )

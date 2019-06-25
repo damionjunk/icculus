@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.suskalo/discljord "0.2.4"]
+                 [org.suskalo/discljord "0.2.5"]
                  [cheshire "5.8.1"]
                  ;; SQL
                  [com.layerware/hugsql "0.4.9"]
