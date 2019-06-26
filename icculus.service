@@ -1,0 +1,14 @@
+[Unit]
+Description=Icculus
+
+[Service]
+WorkingDirectory=/home/ec2-user/icculus-clj
+EnvironmentFile=/home/ec2-user/icculus.env
+ExecStart=/usr/bin/java -Xms128m -Xmx256m -jar icculus-standalone.jar
+User=ec2-user
+Type=simple
+Restart=on-failure
+RestartSec=180
+
+[Install]
+WantedBy=multi-user.target

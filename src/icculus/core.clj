@@ -6,7 +6,8 @@
             [icculus.repl :as repl]
             [icculus.discord :as discord]
             [icculus.config :refer [env]]
-            ))
+            )
+  (:gen-class))
 
 (def cli-options
   [["-p" "--port PORT"    "Port number" :parse-fn #(Integer/parseInt %)]

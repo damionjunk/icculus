@@ -55,7 +55,7 @@
      }))
 
 (defmethod build-embed :lastplayed [{title :title}]
-  (if-let [songs (stats/last-n-played 3 title)]
+  (if-let [songs (stats/last-n-played 4 title)]
     {:color       (rand-nth colors)
      :title       (str (:title (first songs)) " was last played on " (timef/unparse readable-date (:show_date (first songs))))
      :description 
@@ -158,7 +158,6 @@
 (defmethod build-embed :setlist [{setdate :start :as c}]
   (when setdate
     (when-let [sd (stats/get-set-data setdate)]
-      (log/info "SD:" sd)
       {:color (rand-nth colors)
        :title (str "Setlist for " (timef/unparse setlist-date setdate) " @ "
                    (:name sd) " in " (:location sd))
@@ -171,8 +170,6 @@
 (defmethod handler :default [_ _])
 
 (defmethod handler :message-create [event-type {{bot :bot} :author :keys [channel-id content author] :as mp}]
-  (log/info event-type)
-  (log/info content)
   (when-not bot
     (when-let [cmd (i/icculizer content)]
       (when-let [embed (build-embed cmd)]

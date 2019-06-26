@@ -20,5 +20,6 @@
                  [nrepl "0.6.0"]
 
                  ]
-  :main ^:skip-aot icculus.core
+  :main icculus.core
+  :uberjar-name "icculus-standalone.jar"
   )
