@@ -1,6 +1,6 @@
 # icculus
 
-Work in progress bot for the Phishcord discord server.
+The Phish bot on the somewhat official `/r/phish` [Phishcord discord](https://discord.gg/MFh8dGC).
 
 ## Usage
 

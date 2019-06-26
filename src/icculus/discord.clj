@@ -42,6 +42,7 @@
                    "@el-chapo - Scribe of the records of the holy 4."
                    "@marv - Populator of bits for the population."
                    "@mocacola15, @inf4m0us - Early vessels of the knowledge of Icculus."
+                   "@s0ulfire - Hater of regex, lover of LISP"
                    "@Dirty Harry Hood, @alflup - Prayers to Icculus were heard."
                    "```"])
    :footer      {:text "Your name too can be written in the Helping Friendly Book."}})
