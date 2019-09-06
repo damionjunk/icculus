@@ -17,7 +17,6 @@ CREATE TABLE venues (
   country varchar(255)
 );
 
-
 DROP TABLE IF EXISTS shows;
 CREATE TABLE shows (
   id integer NOT NULL,
@@ -37,7 +36,8 @@ DROP TABLE IF EXISTS songs;
 CREATE TABLE songs (
   id integer NOT NULL,
   title varchar(255) NOT NULL,
-  alias_for integer,
+  alias varchar(255) DEFAULT NULL,
+  alias_slug varchar(255) DEFAULT NULL,
   slug varchar(255) NOT NULL
 );
 

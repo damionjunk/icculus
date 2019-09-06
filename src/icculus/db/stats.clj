@@ -115,24 +115,21 @@
   (longest "yem")
   (shortest "yem")
 
-  (longest-by-song-id (:db env) {:song_id 879 :limit 3})
+  (longest-by-song-id (:db env) {:song_id 879
+                                 :limit   3})
 
   (-> (duration-agg-stats "yem") :avg (.longValue))
-  
-  
-  
 
   (def xf (map :plays))
-  (transduce (map :plays) + (track-total-by-era (:db env) {:era "3.0" :song_id 879}))
-
+  (transduce (map :plays) + (track-total-by-era (:db env) {:era     "3.0"
+                                                           :song_id 879}))
 
   (times-played "yem" :era "3.0")
   (times-played "yem" :range (time/date-time 2016))
 
 
   (let [sd (:show_date (last-played "yem"))]
-    (time/minus (time/now) sd)
-    )
+    (time/minus (time/now) sd))
 
 
   (.. (time/interval (time/date-time 2019 04 23) (time/now)) toDuration getStandardDays)
@@ -140,7 +137,7 @@
 
   (type (:alias_for (first (find-song-by-slug (:db env) {:slug "yem"}))))
 
-
+  (last-n-played 5 "bathtub gin" )
 
   (get-song "YEM")
   (first-played "YeM   ")
@@ -151,9 +148,7 @@
   (clojure.pprint/pprint  (get-set-data "12/31/2018"))
   (show-by-date (:db env) {:show_date "2019-06-21"})
   (tracks-by-show-id (:db env) {:show_id 999007})
-  
+
   (show-gap "strawberry fields forever")
   (day-gap "strawberry fields forever")
-  (day-gap "yem")
-
-  )
+  (day-gap "yem"))

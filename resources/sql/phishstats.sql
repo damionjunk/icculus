@@ -3,7 +3,7 @@
 SELECT * FROM songs WHERE id = :id
 
 -- :name find-song-by-slug :?
-SELECT * FROM songs WHERE slug = :slug
+SELECT * FROM songs WHERE slug = :slug OR alias_slug = :slug
 
 -- :name first-played-by-id :?
 -- :doc Finds the first time a song was played.

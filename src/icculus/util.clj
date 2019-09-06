@@ -12,6 +12,17 @@
        (-> song s/lower-case s/trim
            (s/replace #"\\\/" " ") (s/replace #"[()’‘”“\"\'\.?!,_&=]" "") (s/replace #"\s+" "-"))))
 
+(defn yearify [ystr]
+(try
+  (when-let [y (Long/parseLong ystr)]
+    (cond (and (< y 1000) (> y 50)) (+ 1900 y)
+          (and (< y 1000) (< y 50)) (+ 2000 y)
+          :default y
+          )
+      
+    )
+  (catch Exception e)))
+
 (defn ->date [dstr]
   (try
     (when dstr
@@ -27,7 +38,12 @@
         ;; 01/02/2018
         (re-matches #"^\d{1,2}[-/]\d{1,2}[-/]\d{4}" dstr)
         (-> (s/split dstr #"[-/]")
-            ((fn [[m d y]] (time/date-time (Long/parseLong y) (Long/parseLong m) (Long/parseLong d)))))))
+            ((fn [[m d y]] (time/date-time (Long/parseLong y) (Long/parseLong m) (Long/parseLong d)))))
+
+        ;; 01/02/18
+        (re-matches #"^\d{1,2}[-/]\d{1,2}[-/]\d{2}" dstr)
+        (-> (s/split dstr #"[-/]")
+            ((fn [[m d y]] (time/date-time (yearify y) (Long/parseLong m) (Long/parseLong d)))))))
     (catch Exception e
       ;; nil is fine
       )))

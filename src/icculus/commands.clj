@@ -6,6 +6,11 @@
   {"?icculus"     {:cmd  :icculus :sort 0
                    :help ""
                    :examples ["This help."]}
+   "?daystill"    {:cmd      :daystill
+                   :title    true
+                   :sort     1
+                   :help     "[date]"
+                   :examples ["?daystill 8/30/20"]}
    "?fam"         {:cmd  :fam :sort 0
                    :help ""
                    :examples ["A list of keepers of the tenets of the Helping Friendly Book."]}
@@ -72,19 +77,25 @@
             (#(if (= :timesplayed (:cmd %))                 ; multiple possible date/era arrangements
                 (merge % (tp-parser rst))
                 %))
+            ;; Convert the dates for the following commands.
+            (#(if (= :daystill (:cmd %))
+                (assoc % :start (util/->date rst))
+                %))
             (#(if (= :setlist (:cmd %))
                 (assoc % :start (util/->date rst))
                 %)))))
 
 
 (comment
-
+ 
+   (+ 1 1)
+  
   (icculizer "?timesplayed 2017 2018 46 days")
   (icculizer "?timesplayed")
   (icculizer "?setlist 6/21/2019")
   (icculizer "?setlist")
   (icculizer "?shortest yem")
-  
+
   (icculizer "?longest yem")
 
 
@@ -94,7 +105,4 @@
   (tp-parser "2018 2019 46 days")
   (tp-parser "1-2018 2019 46 days")
   (tp-parser "2018 46 days")
-  (tp-parser "z 2018 46 days")
-
-
-  )
+  (tp-parser "z 2018 46 days"))

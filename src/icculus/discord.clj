@@ -10,7 +10,8 @@
             [icculus.config :refer [env]]
             [icculus.db.stats :as stats]
             [clojure.string :as s]
-            [icculus.util :as util]))
+            [icculus.util :as util])
+  (:import (org.joda.time Days)))
 
 ;; Keeps connection information for discljord.
 (defonce state (atom nil))
@@ -18,6 +19,7 @@
 (def colors [0x375E97 0xFB6542 0xFFBB00 0x3F681C])
 (def readable-date (timef/formatter "EEEE, MMMM dd, yyyy"))
 (def setlist-date (timef/formatter "MM/dd/yyyy"))
+(def phish-in-date (timef/formatter "yyyy-MM-dd"))
 
 (def build-embed nil)
 (defmulti build-embed (fn [{cmd :cmd}] cmd))
@@ -73,6 +75,7 @@
 
 (defn gap-message [[l h] gap]
   (cond
+    (= gap 69) "La-mao, the sexy number!"
     (<= gap l) "That seems about right."
     (<= gap h) "I'm not sure I'm okay with this..."
     :default "This is too damn long!"))
@@ -163,8 +166,26 @@
       {:color (rand-nth colors)
        :title (str "Setlist for " (timef/unparse setlist-date setdate) " @ "
                    (:name sd) " in " (:location sd))
-       :description (apply str (setlist (:tracks sd)))
+       :description (str (apply str (setlist (:tracks sd)))
+                         "https://phish.in/" (timef/unparse phish-in-date setdate))
        :footer {:text (str "Total set duration: " (util/duration->hh-mm-ss (:duration sd)))}}
+      )))
+
+(defn dt-eggs [dcount]
+  (cond
+    (= 420 dcount) "Cough, Cough, Cough.... Whaaaat?"
+    (= 69 dcount) "LMAO, the sexy number!"
+    :default ""))
+
+(defmethod build-embed :daystill [{dt :start :as c}]
+  (when dt
+    (let [today (.withTimeAtStartOfDay (time/now))
+          fdate (.withTimeAtStartOfDay dt)
+          betw  (.getDays (Days/daysBetween today fdate))]
+      {:color       (rand-nth colors)
+       :title       (str "d-d-d-date math")
+       :description (str "There are *" betw "* days between now and " (timef/unparse setlist-date dt))
+       :footer      {:text (dt-eggs betw)}}
       )))
 
 (def handler nil)
