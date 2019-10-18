@@ -47,6 +47,7 @@
                    "@s0ulfire - Hater of regex, lover of LISP"
                    "@Beefart - Keeping it weird. As Bee's, or Beef do."
                    "@Dirty Harry Hood, @alflup - Prayers to Icculus were heard."
+                   "@mg98302 - SUPREME GOD OF THE SKY, keeper of #the-book"
                    "```"])
    :footer      {:text "Your name too can be written in the Helping Friendly Book."}})
 
@@ -112,11 +113,12 @@
      :description (str "There were a total of " (:period-total tpdata) " songs played during this period.")
      :footer      {:text (str "This represents " title " being played " (util/round-double 2 (* 100 (double (/ (:plays tpdata) (:period-total tpdata))))) "% of the time.")}}))
 
-(defn duration-message [i {dur :duration title :title loc :name city :location d :date}]
+(defn duration-message [i {mp3 :mp3 dur :duration title :title loc :name city :location d :date}]
   (str "[" (inc i) "]: " (util/duration->human (long dur))
        " on " (timef/unparse readable-date d)
        " 🐟🐟🐟 @ "
        loc " in " city
+       "\n --> "mp3
        "\n\n"))
 
 (defn agg-stats-message [{avg :avg sd :sd mmin :min mmax :max}]

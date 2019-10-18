@@ -93,7 +93,7 @@
     (let [longest-tracks (longest-by-song-id (:db env) {:song_id (:id song) :limit (or limit 3)})]
       (map (fn [lt]
              (let [show (get-set-data (:show_date lt))]
-               (merge (select-keys lt [:duration :title])
+               (merge (select-keys lt [:duration :title :mp3])
                       (select-keys show [:name :location])
                       {:date (-> show :tracks first :show_date)
                        :dow  (-> show :tracks first :dow)})))
@@ -104,7 +104,7 @@
     (let [shortest-tracks (shortest-by-song-id (:db env) {:song_id (:id song) :limit (or limit 3)})]
       (map (fn [lt]
              (let [show (get-set-data (:show_date lt))]
-               (merge (select-keys lt [:duration :title])
+               (merge (select-keys lt [:duration :title :mp3])
                       (select-keys show [:name :location])
                       {:date (-> show :tracks first :show_date)
                        :dow  (-> show :tracks first :dow)})))
